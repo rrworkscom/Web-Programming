@@ -217,7 +217,7 @@ footer {
     }
 
     main section:nth-of-type(2) {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
 
     main section:nth-of-type(2) article p {
@@ -253,7 +253,7 @@ footer {
     }
 
     main section:nth-of-type(2) {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
