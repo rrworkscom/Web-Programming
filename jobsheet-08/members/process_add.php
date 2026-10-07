@@ -26,13 +26,25 @@ $stmt = $pdo->prepare(
      VALUES (:name, :member_id, :address, :phone)
      RETURNING id"
 );
-$stmt->execute([
-    'name' => $name,
-    'member_id' => $memberId,
-    'address' => $address,
-    'phone' => $phone,
-]);
 
-$_SESSION['flash'] = ['type' => 'success', 'message' => 'Member added successfully.'];
+try {
+    $stmt->execute([
+        'name' => $name,
+        'member_id' => $memberId,
+        'address' => $address,
+        'phone' => $phone,
+    ]);
+
+    $_SESSION['flash'] = [
+        'type' => 'success',
+        'message' => 'Member added successfully.'
+    ];
+} catch (PDOException $e) {
+    $_SESSION['flash'] = [ 
+        'type' => 'error',
+        'message' => 'The member ID is already in use. Please use a different one.'
+    ];
+}
+
 header('Location: list.php');
 exit;

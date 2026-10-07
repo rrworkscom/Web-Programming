@@ -6,52 +6,77 @@ require __DIR__ . '/../includes/connection.php';
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
 
-$books = $pdo->query("SELECT * FROM books ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
+$keyword = trim($_GET['keyword'] ?? '');
+
+$stmt = $pdo->prepare(
+    "SELECT * FROM books
+     WHERE title ILIKE :keyword
+     ORDER BY id DESC"
+);
+
+$stmt->execute([
+    'keyword' => '%' . $keyword . '%'
+]);
+
+$books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-        <section>
-            <h2>Book List</h2>
 
-            <?php if ($flash): ?>
-                <p class="flash flash-<?php echo $flash['type']; ?>"><?php echo $flash['message']; ?></p>
-            <?php endif; ?>
+<section>
+    <h2>Book List</h2>
 
-            <div class="search-box">
-                <label for="search-input">Search Book Title</label>
-                <input type="text" id="search-input" placeholder="Type book title...">
-            </div>
+    <?php if ($flash): ?>
+        <p class="flash flash-<?php echo $flash['type']; ?>"><?php echo $flash['message']; ?></p>
+    <?php endif; ?>
 
-            <div class="table-responsive">
-            <table>
-                <thead>
+    <form method="GET">
+        <div class="search-box">
+            <label for="search-input">Search Book Title</label>
+            <input
+                type="text"
+                id="search-input"
+                name="keyword"
+                placeholder="Type book title..."
+                value="<?php echo htmlspecialchars($keyword); ?>">
+            <button type="submit">Search</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Year</th>
+                    <th>Stock</th>
+                    <th>Date Added</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <?php if (empty($books)): ?>
                     <tr>
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>Year</th>
-                        <th>Stock</th>
-                        <th>Action</th>
+                        <td colspan="6">No book data yet. Please add one via the "Add Book" menu.</td>
                     </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($books)): ?>
-                    <tr>
-                        <td colspan="5">No book data yet. Please add one via the "Add Book" menu.</td>
-                    </tr>
-                    <?php else: ?>
-                        <?php foreach ($books as $book): ?>
+                <?php else: ?>
+                    <?php foreach ($books as $book): ?>
                         <tr>
                             <td><?php echo $book['title']; ?></td>
                             <td><?php echo $book['author']; ?></td>
                             <td><?php echo $book['year']; ?></td>
                             <td><?php echo $book['stock']; ?></td>
+                            <td><?php echo $book['date_added']; ?></td>
                             <td>
                                 <button type="button">Edit</button>
                                 <button type="button" class="btn-delete">Delete</button>
                             </td>
                         </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-            </div>
-        </section>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
+
 <?php include __DIR__ . '/../includes/footer.php'; ?>
