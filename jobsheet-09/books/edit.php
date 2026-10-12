@@ -1,0 +1,94 @@
+<?php
+$page_title = "Edit Book";
+include __DIR__ . '/../includes/header.php';
+require __DIR__ . '/../includes/connection.php';
+
+$id = $_GET['id'] ?? null;
+
+if (!$id || !ctype_digit((string) $id)) {
+    header('Location: list.php');
+    exit;
+}
+
+$stmt = $pdo->prepare("SELECT * FROM books WHERE id = :id");
+$stmt->execute(['id' => $id]);
+
+$book = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$book) {
+    header('Location: list.php');
+    exit;
+}
+?>
+
+<section>
+    <h2>Edit Book</h2>
+
+    <form method="POST" action="update.php"
+        onsubmit="return confirm('Are you sure you want to update this book?');">
+        <input type="hidden" name="id"
+            value="<?php echo $book['id']; ?>">
+
+        <div>
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title"
+                value="<?php echo htmlspecialchars($book['title']); ?>"
+                required>
+        </div>
+
+        <div>
+            <label for="author">Author</label>
+            <input type="text" id="author" name="author"
+                value="<?php echo htmlspecialchars($book['author']); ?>"
+                required>
+        </div>
+
+        <div>
+            <label for="year">Year</label>
+            <input type="number" id="year" name="year"
+                value="<?php echo htmlspecialchars((string) $book['year']); ?>"
+                required>
+        </div>
+
+        <div>
+            <label for="isbn">ISBN</label>
+            <input type="text" id="isbn" name="isbn"
+                value="<?php echo htmlspecialchars($book['isbn']); ?>"
+                required>
+        </div>
+
+        <div>
+            <label for="stock">Stock</label>
+            <input type="number" id="stock" name="stock"
+                min="0"
+                value="<?php echo htmlspecialchars((string) $book['stock']); ?>"
+                required>
+        </div>
+
+        <div>
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <?php
+                $categories = [
+                    'fiction' => 'Fiction',
+                    'non-fiction' => 'Non-Fiction',
+                    'reference' => 'Reference'
+                ];
+                ?>
+
+                <?php foreach ($categories as $value => $label): ?>
+                    <option value="<?php echo $value; ?>"
+                        <?php echo $book['category'] === $value
+                            ? 'selected' : ''; ?>>
+                        <?php echo $label; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <button type="submit">Update Book</button>
+        <a href="list.php">Cancel</a>
+    </form>
+</section>
+
+<?php include __DIR__ . '/../includes/footer.php'; ?>
